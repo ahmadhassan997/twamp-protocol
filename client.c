@@ -421,7 +421,7 @@ int main(int argc, char *argv[])
 
             /* Try to bind on an available port */
             while (check_time--) {
-                twamp_test[active_sessions].testport = port_send + rand() % 1000;
+                twamp_test[active_sessions].testport = port_send;
                 local_addr6.sin6_port = htons(twamp_test[active_sessions].testport);
                 if (!bind
                     (twamp_test[active_sessions].testfd,
@@ -436,7 +436,7 @@ int main(int argc, char *argv[])
 
             /* Try to bind on an available port */
             while (check_time--) {
-                twamp_test[active_sessions].testport = port_send + rand() % 1000;
+                twamp_test[active_sessions].testport = port_send;
                 local_addr.sin_port = htons(twamp_test[active_sessions].testport);
                 if (!bind
                     (twamp_test[active_sessions].testfd,
@@ -460,7 +460,7 @@ int main(int argc, char *argv[])
         req.Type = kRequestTWSession;
         req.IPVN = 4;
         req.SenderPort = htons(twamp_test[active_sessions].testport);
-        req.ReceiverPort = htons(port_recv + rand() % 1000);
+        req.ReceiverPort = htons(port_recv);
         if(socket_family == AF_INET) {
             req.SenderAddress = host_addr.sin_addr.s_addr;
             //req.SenderAddress = 0;

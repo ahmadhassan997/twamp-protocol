@@ -361,7 +361,7 @@ static int send_accept_session(struct client_info *client, RequestSession * req)
 
             while (check_time-- && bind(testfd, (struct sockaddr *)&local_addr,
                                     sizeof(local_addr)) < 0)
-                local_addr.sin6_port = htons(port_min + rand() % 1000);
+                local_addr.sin6_port = htons(port_min);
 
             if (check_time > 0) {
                 req->ReceiverPort = local_addr.sin6_port;
@@ -375,7 +375,7 @@ static int send_accept_session(struct client_info *client, RequestSession * req)
 
             while (check_time-- && bind(testfd, (struct sockaddr *)&local_addr,
                                     sizeof(struct sockaddr)) < 0)
-                local_addr.sin_port = htons(port_min + rand() % 1000);
+                local_addr.sin_port = htons(port_min);
 
             if (check_time > 0) {
                 req->ReceiverPort = local_addr.sin_port;
