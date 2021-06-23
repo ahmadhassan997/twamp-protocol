@@ -55,8 +55,6 @@ static uint8_t mbz_offset = 0;  /* Offset for padding in Symmetrical and DSCP/EC
 static uint16_t active_sessions = 0;
 static uint16_t otbr = 0;       /* Octets To Be Reflected */
 static int socket_family = AF_INET;
-static char* file_name;   /* Log stats to a file */
-static uint8_t store_header = 1;
 
 static enum Mode workmode = kModeUnauthenticated;
 
@@ -86,116 +84,6 @@ static void usage(char *progname)
     return;
 }
 
-/* The parse_options will check the command line arguments */
-static int parse_options(struct hostent **server, int argc, char *argv[])
-{
-    char *server_host;
-    if (argc < 2) {
-        return 1;
-    }
-    int opt;
-
-    while ((opt = getopt(argc, argv, "s:a:p:P:n:m:l:t:d:i:o:f:h:6:N")) != -1) {
-        switch (opt) {
-        case 's':
-            /* Get the Server's IP */
-            server_host = optarg;
-            break;
-        case 'a':
-            authmode = strtol(optarg, NULL, 10);
-            /* For now it only supports unauthenticated mode */
-            if (authmode < 0 || authmode > 511)
-                return 1;
-            break;
-        case 'p':
-            port_send = strtol(optarg, NULL, 10);
-            /* The port must be a valid one */
-            if (port_send < 1024 || port_send > 65535)
-                return 1;
-            break;
-        case 'P':
-            port_recv = strtol(optarg, NULL, 10);
-            /* The port must be a valid one */
-            if (port_recv < 1024 || port_recv > 65535)
-                return 1;
-            break;
-        case 'n':
-            errno = 0;
-            long sessions = strtol(optarg, NULL, 10);
-            /* Test sessions number must be a valid one */
-            if ((errno == ERANGE)
-                || (sessions >= INT_MAX)
-                || (sessions <= 0)) {
-                perror("strtol");
-                return 1;
-            }
-            test_sessions_no = (uint16_t) sessions;
-            break;
-        case 'm':
-            errno = 0;
-            long msgs = strtol(optarg, NULL, 10);
-            /* Test messages per session must be a valid one */
-            if ((errno == ERANGE)
-                || (msgs >= LONG_MAX)
-                || (msgs <= 0)) {
-                perror("client");
-                return 1;
-            }
-            test_sessions_msg = (uint32_t) msgs;
-            break;
-        case 'l':
-            payload_len = strtol(optarg, NULL, 10);
-            /* The length value must be a valid one */
-            if (payload_len < 41 || payload_len > TST_PKT_SIZE)
-                return 1;
-            break;
-        case 't':
-            snd_tos = strtol(optarg, NULL, 10);
-            /* The TOS value must be a valid one (no congestion on ECN */
-            snd_tos = snd_tos - (((snd_tos & 0x2) >> 1) & (snd_tos & 0x1));
-            break;
-        case 'd':
-            dscp_snd = strtol(optarg, NULL, 10);
-            /* The DSCP value must be a valid one */
-            if (dscp_snd > 63)
-                return 1;
-            snd_tos = dscp_snd << 2;
-            //printf("TOS value is: %d\n", ip_hdr_snd.tos);
-            break;
-        case 'i':
-            interv_msg = strtol(optarg, NULL, 10);
-            /* The interval must be a valid one */
-            if (interv_msg > 10000)
-                return 1;
-            break;
-        case 'o':
-            otbr = strtol(optarg, NULL, 10);
-            /* The octets to be reflected value must be a valid one */
-            authmode = authmode | kModeReflectOctets;
-            break;
-        case 'f':
-            file_name = optarg;
-            break;
-        case '6':
-            socket_family = AF_INET6;
-            break;
-        case 'N':
-            store_header = 0;
-            break;
-        case 'h':
-        default:
-            return 1;
-        }
-    }
-
-    if(socket_family == AF_INET6) {
-        *server = gethostbyname2(server_host, AF_INET6);
-    } else {
-        *server = gethostbyname(server_host);
-    }
-
-    return 0;
-}
 
 /* This function sends StopSessions to stop all active Test sessions */
 static int send_stop_session(int socket, int accept, int sessions)
@@ -239,13 +127,13 @@ static char *get_accept_str(int code)
     }
 }
 
-int main(int argc, char *argv[])
+int tawmp_client(char server_host[256], int p_recv, char log_file[256], int store_header)
 {
-    char *progname = argv[0];
+    // char *progname = argv[0];
     srand(time(NULL));
-    if (strrchr(progname, '/') != NULL) {
-        progname = strrchr(progname, '/') + 1;
-    }
+    // if (strrchr(progname, '/') != NULL) {
+    //     progname = strrchr(progname, '/') + 1;
+    // }
 
     struct sockaddr_in serv_addr;
     struct sockaddr_in6 serv_addr6;
@@ -253,28 +141,40 @@ int main(int argc, char *argv[])
     struct hostent *server;
 
     /* Sanity check */
-#if 1
-    if (getuid() == 0) {
-        fprintf(stderr, "%s should not be run as root\n", progname);
-        exit(EXIT_FAILURE);
-    }
-#endif
+// #if 1
+//     if (getuid() == 0) {
+//         fprintf(stderr, "%s should not be run as root\n", progname);
+//         exit(EXIT_FAILURE);
+//     }
+// #endif
 
     /* Check client options */
-    if (parse_options(&server, argc, argv)) {
-        usage(progname);
-        exit(EXIT_FAILURE);
-    }
+    // if (parse_options(&server, argc, argv)) {
+    //     usage(progname);
+    //     exit(EXIT_FAILURE);
+    // }
+    
+    // get server
+    server = gethostbyname(server_host);
     if (server == NULL) {
         perror("Error, no such host");
         exit(EXIT_FAILURE);
     }
 
+    // store port
+    port_recv = p_recv;
+    /* The port must be a valid one */
+    if (port_recv < 1024 || port_recv > 65535) {
+        fprintf(stderr, "invalid port\n");
+        exit(EXIT_FAILURE);
+    }
+
+    // log file
     FILE *log_fd;
-    fprintf(stderr, "log file: %s\n", file_name);
-    log_fd = fopen(file_name, "a");
+    fprintf(stderr, "log file: %s\n", log_file);
+    log_fd = fopen(log_file, "a");
     if (log_fd == NULL) {
-        fprintf(stderr, "couldn't open log file: %s\n", file_name);
+        fprintf(stderr, "couldn't open log file: %s\n", log_file);
         exit(EXIT_FAILURE);
     }
 
@@ -800,5 +700,11 @@ int main(int argc, char *argv[])
     free(twamp_test);
     close(servfd);
     fclose(log_fd);
+    return 0;
+}
+
+
+int main(int argc, char *argv[]) {
+    tawmp_client("20.46.233.226", 5201, "test1.csv", 0);
     return 0;
 }

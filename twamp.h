@@ -28,6 +28,7 @@
 #include <stdlib.h>
 #include <inttypes.h>
 #include <sys/time.h>
+#include <stdio.h>
 
 #define HDR_TTL		255         /* TTL=255 in TWAMP for IP Header */
 #define SERVER_PORT 862
@@ -248,7 +249,7 @@ int get_actual_shutdown(const struct timeval *tv, const struct timeval *ts,
 uint64_t print_metrics(uint16_t snd_port, uint16_t rcv_port, uint8_t snd_tos,
                        uint8_t sw_ttl, uint8_t sw_tos,
                        TWAMPTimestamp * recv_resp_time,
-                       const ReflectorUPacket * pack, enum Mode mode);
+                       const ReflectorUPacket * pack, enum Mode mode, FILE* log_fd);
 
 void print_metrics_server(char *addr_cl, uint16_t snd_port, uint16_t rcv_port,
                           uint8_t snd_tos, uint8_t fw_tos,

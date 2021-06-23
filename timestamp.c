@@ -85,7 +85,7 @@ int get_actual_shutdown(const struct timeval *tv, const struct timeval *ts,
 uint64_t print_metrics(uint16_t snd_port, uint16_t rcv_port, uint8_t snd_tos,
                        uint8_t sw_ttl, uint8_t sw_tos,
                        TWAMPTimestamp * recv_resp_time,
-                       const ReflectorUPacket * pack, enum Mode mode)
+                       const ReflectorUPacket * pack, enum Mode mode, FILE* log_fd)
 {
     /* Compute timestamps in usec */
     uint64_t t_sender_usec = get_usec(&pack->sender_time);
@@ -109,17 +109,17 @@ uint64_t print_metrics(uint16_t snd_port, uint16_t rcv_port, uint8_t snd_tos,
 
     /* Sender TOS received at Reflector */
     if ((mode & kModeDSCPECN) == kModeDSCPECN) {
-        fprintf(stderr,
-                "%.0f\t, %3d\t, %3d\t, %d\t, %d\t,   %c\t, %d\t, %d\t, %d\t, %d\t, %d\t, "
-                "%.3f\t, %.3f\t, %.3f\t, %.3f\n",
+        fprintf(log_fd,
+                "%.0f,%3d,%3d,%d,%d,%c,%d,%d,%d,%d,%d,"
+                "%.3f,%.3f,%.3f,%.3f\n",
                 (double)t_sender_usec * 1e-3, snd_sn, rcv_sn, snd_port,
                 rcv_port, sync, pack->sender_ttl, sw_ttl, snd_tos,
                 pack->sender_tos, sw_tos, (double)(fwd + swd) * 1e-3,
                 (double)(intd) * 1e-3, (double)fwd * 1e-3, (double)swd * 1e-3);
     } else {
-        fprintf(stderr,
-                "%.0f\t, %3d\t, %3d\t, %d\t, %d\t,   %c\t, %d\t, %d\t, %d\t, %3c\t, %d\t, "
-                "%.3f\t, %.3f\t, %.3f\t, %.3f\n",
+        fprintf(log_fd,
+                "%.0f,%3d,%3d,%d,%d,%c,%d,%d,%d,%3c,%d,"
+                "%.3f,%.3f,%.3f,%.3f\n",
                 (double)t_sender_usec * 1e-3, snd_sn, rcv_sn, snd_port,
                 rcv_port, sync, pack->sender_ttl, sw_ttl, snd_tos, '-', sw_tos,
                 (double)(fwd + swd) * 1e-3,
