@@ -705,6 +705,6 @@ int tawmp_client(char server_host[256], int p_recv, char log_file[256], int stor
 
 
 int main(int argc, char *argv[]) {
-    tawmp_client("20.46.233.226", 5201, "test1.csv", 0);
+    tawmp_client("localhost", 4000, "test1.csv", 0);
     return 0;
 }

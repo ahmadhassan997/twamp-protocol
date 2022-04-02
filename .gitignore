@@ -6,3 +6,5 @@ server
 tags
 /Debug/
 /Release/
+build
+*.csv

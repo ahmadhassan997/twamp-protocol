@@ -27,3 +27,10 @@ Note:
         ./server [-h | -a <not supported> | -p <port>]
         ./client -s <ip_server [-h | -a <not_supported> | -p <port_sender> | -P
         <port_receiver> | -n <test_sessions> | -m <test_sess_msgs>]
+
+
+Commands
+
+```bash
+cd build && cmake .. && make && cd ..
+```

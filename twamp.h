@@ -31,7 +31,7 @@
 #include <stdio.h>
 
 #define HDR_TTL		255         /* TTL=255 in TWAMP for IP Header */
-#define SERVER_PORT 862
+#define SERVER_PORT 4000
 #define CHECK_TIMES 100
 #define LOSTTIME	2           /* SECONDS - Timeout for TWAMP test packet */
 
